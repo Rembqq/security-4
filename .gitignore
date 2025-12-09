@@ -1,3 +1,8 @@
+*sessions.json*
+lab4/auth_examples/token_auth/sessions.json
+auth_examples/token_auth/sessions.json
+token_auth/sessions.json
+*.json
 # Logs
 logs
 *.log

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login</title>
+        <title>Login / Register</title>
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     </head>
 
@@ -19,166 +18,266 @@
             </div>
 
             <form id="login-form" action="/api/login" method="post">
-                <input type="text" name="login" id="username-field" class="login-form-field" placeholder="Username">
+                <input type="text" name="login" id="username-field" class="login-form-field" placeholder="Username or email">
                 <input type="password" name="password" id="password-field" class="login-form-field" placeholder="Password">
                 <input type="submit" value="Login" id="login-form-submit">
+                <button type="button" id="show-register" style="margin-top:8px;">Register</button>
             </form>
 
+            <!-- Registration form (hidden by default) -->
+            <div id="register-box" style="display:none; width: 80%; margin-top: 10px;">
+                <h2 id="register-header">Register</h2>
+                <div id="register-error-msg-holder">
+                    <p id="register-error-msg">Registration failed</p>
+                </div>
+                <form id="register-form" action="/api/signup" method="post">
+                    <input type="email" name="email" id="reg-email-field" class="login-form-field" placeholder="Email">
+                    <input type="password" name="password" id="reg-password-field" class="login-form-field" placeholder="Password">
+                    <input type="submit" value="Create account" id="register-form-submit">
+                    <button type="button" id="cancel-register" style="margin-top:8px;">Cancel</button>
+                </form>
+            </div>
+
         </main>
-    </body>
 
+        <style>
+            html {
+                height: 100%;
+            }
+            
+            body {
+                height: 100%;
+                margin: 0;
+                font-family: Arial, Helvetica, sans-serif;
+                display: grid;
+                justify-items: center;
+                align-items: center;
+                background-color: #3a3a3a;
+            }
 
-    <style>
-        html {
-            height: 100%;
-        }
+            #logout {
+                opacity: 0;
+            }
 
-        body {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            display: grid;
-            justify-items: center;
-            align-items: center;
-            background-color: #3a3a3a;
-        }
+            #main-holder {
+                width: 50%;
+                height: 70%;
+                display: grid;
+                justify-items: center;
+                align-items: center;
+                background-color: white;
+                border-radius: 7px;
+                box-shadow: 0px 0px 5px 2px black;
+                padding: 20px;
+                box-sizing: border-box;
+            }
 
-        #logout {
-            opacity: 0;
-        }
+            #login-error-msg-holder, #register-error-msg-holder {
+                width: 100%;
+                height: 100%;
+                display: grid;
+                justify-items: center;
+                align-items: center;
+            }
 
-        #main-holder {
-            width: 50%;
-            height: 70%;
-            display: grid;
-            justify-items: center;
-            align-items: center;
-            background-color: white;
-            border-radius: 7px;
-            box-shadow: 0px 0px 5px 2px black;
-        }
+            #login-error-msg, #register-error-msg {
+                width: 60%;
+                text-align: center;
+                margin: 0;
+                padding: 5px;
+                font-size: 12px;
+                font-weight: bold;
+                color: #8a0000;
+                border: 1px solid #8a0000;
+                background-color: #e58f8f;
+                opacity: 0;
+            }
 
-        #login-error-msg-holder {
-            width: 100%;
-            height: 100%;
-            display: grid;
-            justify-items: center;
-            align-items: center;
-        }
+            #login-form {
+                align-self: flex-start;
+                display: grid;
+                justify-items: center;
+                align-items: center;
+                width: 60%;
+            }
 
-        #login-error-msg {
-            width: 23%;
-            text-align: center;
-            margin: 0;
-            padding: 5px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #8a0000;
-            border: 1px solid #8a0000;
-            background-color: #e58f8f;
-            opacity: 0;
-        }
+            .login-form-field::placeholder {
+                color: #3a3a3a;
+            }
 
-        #error-msg-second-line {
-            display: block;
-        }
+            .login-form-field {
+                border: none;
+                border-bottom: 1px solid #3a3a3a;
+                margin-bottom: 10px;
+                border-radius: 3px;
+                outline: none;
+                padding: 5px 5px;
+                width: 100%;
+                box-sizing: border-box;
+            }
 
-        #login-form {
-            align-self: flex-start;
-            display: grid;
-            justify-items: center;
-            align-items: center;
-        }
+            #login-form-submit, #register-form-submit {
+                width: 100%;
+                padding: 7px;
+                border: none;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                background-color: #3a3a3a;
+                cursor: pointer;
+                outline: none;
+            }
 
-        .login-form-field::placeholder {
-            color: #3a3a3a;
-        }
+            #show-register, #cancel-register {
+                width: 100%;
+                padding: 7px;
+                border: none;
+                border-radius: 5px;
+                color: #3a3a3a;
+                font-weight: bold;
+                background-color: transparent;
+                cursor: pointer;
+                outline: none;
+                text-decoration: underline;
+            }
 
-        .login-form-field {
-            border: none;
-            border-bottom: 1px solid #3a3a3a;
-            margin-bottom: 10px;
-            border-radius: 3px;
-            outline: none;
-            padding: 0px 0px 5px 5px;
-        }
+            #register-box {
+                display: grid;
+                justify-items: center;
+                align-items: start;
+            }
+        </style>
 
-        #login-form-submit {
-            width: 100%;
-            padding: 7px;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-weight: bold;
-            background-color: #3a3a3a;
-            cursor: pointer;
-            outline: none;
-        }
-    </style>
+        <script>
+            // session read
+            const session = sessionStorage.getItem('session');
 
-    <script>
-        const session = sessionStorage.getItem('session');
+            let token;
+            try {
+                token = JSON.parse(session).token;
+            } catch(e) {}
 
-        let token;
+            const loginForm = document.getElementById("login-form");
+            const loginButton = document.getElementById("login-form-submit");
+            const loginErrorMsg = document.getElementById("login-error-msg");
+            const logoutLink =  document.getElementById("logout");
+            const showRegisterBtn = document.getElementById("show-register");
+            const registerBox = document.getElementById("register-box");
+            const cancelRegisterBtn = document.getElementById("cancel-register");
+            const registerForm = document.getElementById("register-form");
+            const registerErrorMsg = document.getElementById("register-error-msg");
+            const loginHeader = document.getElementById("login-header");
 
-        try {
-            token = JSON.parse(session).token;
-        } catch(e) {}
+            // If we have a session token, ask server for session info
+            if (token) {
+                axios.get('/', {
+                    headers: {
+                        Authorization: token
+                    }
+                }).then((response) => {
+                    const { username } = response.data;
 
-        if (token) {
-            axios.get('/', {
-                headers: {
-                    Authorization: token
-                }
-            }).then((response) => {
-                const { username } = response.data;
+                    if (username) {
+                        const mainHolder = document.getElementById("main-holder");
 
-                if (username) {
-                    const mainHolder = document.getElementById("main-holder");
-                    const loginHeader = document.getElementById("login-header");
+                        loginForm.remove();
+                        loginErrorMsg.remove();
+                        loginHeader.remove();
 
-                    loginForm.remove();
-                    loginErrorMsg.remove();
-                    loginHeader.remove();
+                        const hello = document.createElement('div');
+                        hello.textContent = `Hello ${username}`;
+                        hello.style.fontSize = '20px';
+                        mainHolder.append(hello);
+                        logoutLink.style.opacity = 1;
+                    }
+                }).catch(() => {
+                    // invalid session token in storage
+                    sessionStorage.removeItem('session');
+                });
+            }
 
-                    mainHolder.append(`Hello ${username}`);
-                    logoutLink.style.opacity = 1;
-                }
-            });
-        }
-
-
-        const loginForm = document.getElementById("login-form");
-        const loginButton = document.getElementById("login-form-submit");
-        const loginErrorMsg = document.getElementById("login-error-msg");
-        const logoutLink =  document.getElementById("logout");
-
-        logoutLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            sessionStorage.removeItem('session');
-            location.reload();
-        });
-
-        loginButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            const login = loginForm.login.value;
-            const password = loginForm.password.value;
-
-
-            axios({
-                method: 'post',
-                url: '/api/login',
-                data: {
-                    login,
-                    password
-                }
-            }).then((response) => {
-                const { username } =  response.data;
-                sessionStorage.setItem('session', JSON.stringify(response.data));
+            logoutLink.addEventListener("click", (e) => {
+                e.preventDefault();
+                sessionStorage.removeItem('session');
                 location.reload();
-            }).catch((response) => {
-                loginErrorMsg.style.opacity = 1;
             });
-        })
-    </script>
+
+            loginButton.addEventListener("click", (e) => {
+                e.preventDefault();
+                const login = loginForm.login.value;
+                const password = loginForm.password.value;
+
+                loginErrorMsg.style.opacity = 0;
+
+                axios({
+                    method: 'post',
+                    url: '/api/login',
+                    data: {
+                        // send both names to be safe (server accepts username or login)
+                        username: login,
+                        login: login,
+                        password: password
+                    }
+                }).then((response) => {
+                    // Save session (server returns token and username)
+                    sessionStorage.setItem('session', JSON.stringify(response.data));
+                    location.reload();
+                }).catch((err) => {
+                    loginErrorMsg.style.opacity = 1;
+                });
+            });
+
+            // Show register form
+            showRegisterBtn.addEventListener("click", (e) => {
+                registerBox.style.display = 'grid';
+                // hide login header and form slightly
+                loginHeader.style.display = 'none';
+                loginForm.style.display = 'none';
+            });
+
+            cancelRegisterBtn.addEventListener("click", (e) => {
+                registerBox.style.display = 'none';
+                loginHeader.style.display = '';
+                loginForm.style.display = '';
+                registerErrorMsg.style.opacity = 0;
+            });
+
+            registerForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const email = document.getElementById('reg-email-field').value;
+                const password = document.getElementById('reg-password-field').value;
+
+                registerErrorMsg.style.opacity = 0;
+
+                if (!email || !password) {
+                    registerErrorMsg.textContent = 'Email and password required';
+                    registerErrorMsg.style.opacity = 1;
+                    return;
+                }
+
+                axios({
+                    method: 'post',
+                    url: '/api/signup',
+                    data: {
+                        email,
+                        password
+                    }
+                }).then((response) => {
+                    // On success: auto-login user (attempt)
+                    return axios.post('/api/login', {
+                        username: email,
+                        password: password
+                    });
+                }).then((loginResp) => {
+                    // saved session and reload
+                    sessionStorage.setItem('session', JSON.stringify(loginResp.data));
+                    location.reload();
+                }).catch((err) => {
+                    console.error('register error', err?.response?.data || err);
+                    registerErrorMsg.textContent = err?.response?.data?.error || 'Registration failed';
+                    registerErrorMsg.style.opacity = 1;
+                });
+            });
+        </script>
+    </body>
 </html>
