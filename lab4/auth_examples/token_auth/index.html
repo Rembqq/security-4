@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Register</title>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<style>
+    body { font-family: Arial, Helvetica, sans-serif; display: grid; justify-items: center; align-items: center; height: 100vh; margin:0; background-color:#3a3a3a; }
+    #main-holder { width: 50%; background:white; padding:20px; border-radius:7px; box-shadow:0 0 5px 2px black; display:grid; justify-items:center; align-items:center; }
+    form { width: 60%; display:grid; justify-items:center; align-items:center; }
+    input { width:100%; padding:5px; margin-bottom:10px; border:none; border-bottom:1px solid #3a3a3a; border-radius:3px; outline:none; box-sizing:border-box; }
+    input::placeholder { color:#3a3a3a; }
+    button, input[type=submit] { width:100%; padding:7px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; }
+    input[type=submit] { background:#3a3a3a; color:white; }
+    button { background:transparent; color:#3a3a3a; text-decoration:underline; margin-top:8px; }
+    #login-error-msg, #register-error-msg { width:60%; text-align:center; margin:0; padding:5px; font-size:12px; font-weight:bold; color:#8a0000; border:1px solid #8a0000; background:#e58f8f; opacity:0; }
+    #register-box { display:none; width:80%; margin-top:10px; justify-items:center; align-items:start; }
+    #logout { opacity:0; }
+</style>
+</head>
+<body>
+<main id="main-holder">
+    <a href="/logout" id="logout">Logout</a>
+    <h1 id="login-header">Login</h1>
+    <div id="login-error-msg-holder">
+        <p id="login-error-msg">Invalid username <span id="error-msg-second-line">and/or password</span></p>
+    </div>
+    <form id="login-form">
+        <input type="text" name="login" id="username-field" placeholder="Username or email">
+        <input type="password" name="password" id="password-field" placeholder="Password">
+        <input type="submit" value="Login" id="login-form-submit">
+        <button type="button" id="show-register">Register</button>
+    </form>
+    <div id="register-box">
+        <h2 id="register-header">Register</h2>
+        <div id="register-error-msg-holder">
+            <p id="register-error-msg">Registration failed</p>
+        </div>
+        <form id="register-form">
+            <input type="email" name="email" id="reg-email-field" placeholder="Email">
+            <input type="password" name="password" id="reg-password-field" placeholder="Password">
+            <input type="submit" value="Create account" id="register-form-submit">
+            <button type="button" id="cancel-register">Cancel</button>
+        </form>
+    </div>
+</main>
+
+<script>
+const loginForm = document.getElementById("login-form");
+const loginButton = document.getElementById("login-form-submit");
+const loginErrorMsg = document.getElementById("login-error-msg");
+const logoutLink = document.getElementById("logout");
+const showRegisterBtn = document.getElementById("show-register");
+const registerBox = document.getElementById("register-box");
+const cancelRegisterBtn = document.getElementById("cancel-register");
+const registerForm = document.getElementById("register-form");
+const registerErrorMsg = document.getElementById("register-error-msg");
+const loginHeader = document.getElementById("login-header");
+
+// Сесія
+const session = sessionStorage.getItem('session');
+let token;
+try { token = JSON.parse(session).token; } catch(e) {}
+
+// Авто-логін при наявності токена
+if (token) {
+    axios.get('/', { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => {
+            const { username } = res.data;
+            if (username) {
+                loginForm.remove();
+                loginErrorMsg.remove();
+                loginHeader.remove();
+                const hello = document.createElement('div');
+                hello.textContent = `Hello ${username}`;
+                hello.style.fontSize = '20px';
+                document.getElementById("main-holder").append(hello);
+                logoutLink.style.opacity = 1;
+            }
+        }).catch(() => { sessionStorage.removeItem('session'); });
+}
+
+// Logout
+logoutLink.addEventListener("click", e => {
+    e.preventDefault();
+    sessionStorage.removeItem('session');
+    location.reload();
+});
+
+// Login
+loginButton.addEventListener("click", e => {
+    e.preventDefault();
+    const login = loginForm.login.value;
+    const password = loginForm.password.value;
+    loginErrorMsg.style.opacity = 0;
+
+    axios.post('/api/login', { login, password })
+        .then(res => {
+            sessionStorage.setItem('session', JSON.stringify(res.data));
+            location.reload();
+        }).catch(() => { loginErrorMsg.style.opacity = 1; });
+});
+
+// Показати реєстрацію
+showRegisterBtn.addEventListener("click", () => {
+    registerBox.style.display = 'grid';
+    loginHeader.style.display = 'none';
+    loginForm.style.display = 'none';
+});
+
+// Скасувати реєстрацію
+cancelRegisterBtn.addEventListener("click", () => {
+    registerBox.style.display = 'none';
+    loginHeader.style.display = '';
+    loginForm.style.display = '';
+    registerErrorMsg.style.opacity = 0;
+});
+
+// Реєстрація
+registerForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const email = document.getElementById('reg-email-field').value;
+    const password = document.getElementById('reg-password-field').value;
+    registerErrorMsg.style.opacity = 0;
+
+    if (!email || !password) {
+        registerErrorMsg.textContent = 'Email and password required';
+        registerErrorMsg.style.opacity = 1;
+        return;
+    }
+
+    axios.post('/api/signup', { email, password })
+        .then(() => axios.post('/api/login', { login: email, password }))
+        .then(loginResp => {
+            sessionStorage.setItem('session', JSON.stringify(loginResp.data));
+            location.reload();
+        }).catch(err => {
+            registerErrorMsg.textContent = err?.response?.data?.error || 'Registration failed';
+            registerErrorMsg.style.opacity = 1;
+        });
+});
+</script>
+</body>
+</html>
